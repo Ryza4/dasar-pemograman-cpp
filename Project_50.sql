@@ -64,3 +64,47 @@ insert into kategoriBUKU values
 (2,2),
 (3,3);
 
+-- left join
+SELECT Anggota.IDanggota, Anggota.Nama, Peminjaman.IDpeminjaman, Peminjaman.Tanggalpeminjaman
+FROM Anggota
+LEFT JOIN Peminjaman ON Anggota.IDanggota = Peminjaman.IDanggota;
+
+-- right join
+SELECT Peminjaman.IDpeminjaman, Peminjaman.Tanggalpeminjaman, Anggota.IDanggota, Anggota.Nama
+FROM Peminjaman
+RIGHT JOIN Anggota ON Peminjaman.IDanggota = Anggota.IDanggota;
+
+-- union pengganti full join
+SELECT IDanggota, Nama
+FROM Anggota
+UNION
+SELECT IDPenulis AS IDanggota, Nama_penulis AS Nama
+FROM Penulis;
+
+-- procedure
+CREATE PROCEDURE AddNewAnggota(IN p_IDanggota VARCHAR(10),IN p_Nama VARCHAR(100),IN p_Email VARCHAR(100),IN p_Telepon VARCHAR(15),IN p_Alamat VARCHAR(255))
+INSERT INTO Anggota (IDanggota, Nama, Email, Telepon, Alamat)VALUES (p_IDanggota, p_Nama, p_Email, p_Telepon, p_Alamat);
+
+DELIMITER //
+CREATE FUNCTION TotalPeminjamanAnggota(p_IDanggota VARCHAR(10))
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE total INT;
+    SELECT COUNT(*) INTO total
+    FROM Peminjaman
+    WHERE IDanggota = p_IDanggota;
+    RETURN total;
+END //
+DELIMITER ;
+
+-- trigger
+DELIMITER //
+CREATE TRIGGER BeforeAnggotaUpdate
+BEFORE UPDATE ON Anggota
+FOR EACH ROW
+BEGIN
+    INSERT INTO AnggotaLog (IDanggota, OldNama, NewNama, UpdateTime)
+    VALUES (OLD.IDanggota, OLD.Nama, NEW.Nama, NOW());
+END //
+DELIMITER ;
